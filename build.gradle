@@ -8,6 +8,8 @@ repositories {
     mavenLocal()
 }
 
+
+
 dependencies {
     implementation platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-rest-client'
@@ -18,7 +20,6 @@ dependencies {
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-hibernate-orm'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
-    implementation 'org.graalvm.graal-sdk:0.30'
     testImplementation 'io.quarkus:quarkus-junit5'
     
     compileOnly "org.projectlombok:lombok:${project.lombokVersion}"
