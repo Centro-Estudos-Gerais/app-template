@@ -2,11 +2,7 @@ plugins {
     id 'java'
     id 'io.quarkus'
 }
-quarkus {
-    native {
-        enabled = true
-    }
-}
+
 repositories {
     mavenCentral()
     mavenLocal()
