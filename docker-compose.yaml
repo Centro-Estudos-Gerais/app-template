@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  default:
+    driver: bridge
+
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -8,50 +12,60 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    networks:
+      - default
 
-  kafka1:
+  b1-kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://b1-kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
     ports:
       - "9092:9092"
+    networks:
+      - default
 
-  kafka2:
+  b2-kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://b2-kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
     ports:
       - "9093:9093"
+    networks:
+      - default
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:latest
     depends_on:
-      - kafka1
-      - kafka2
+      - b1-kafka
+      - b2-kafka
     environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9093
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: b1-kafka:9092,b2-kafka:9093
       CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:2181
-      CONTROL_CENTER_CONNECT_CLUSTER: connect:8083
       CONTROL_CENTER_REPLICATION_FACTOR: 1
-
+    
     ports:
       - "9021:9021"
+    networks:
+      - default
 
   postgres:
     image: postgres:alpine
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+
+
+volumes:
+  postgres_data:

@@ -2,14 +2,18 @@ plugins {
     id 'java'
     id 'io.quarkus'
 }
-
+quarkus {
+    native {
+        enabled = true
+    }
+}
 repositories {
     mavenCentral()
     mavenLocal()
 }
 
 dependencies {
-    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-rest-client'
     implementation 'io.quarkus:quarkus-messaging-kafka'
     implementation 'io.quarkus:quarkus-opentelemetry'
@@ -18,7 +22,13 @@ dependencies {
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-hibernate-orm'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
+    implementation 'org.graalvm.graal-sdk:0.30'
     testImplementation 'io.quarkus:quarkus-junit5'
+    
+    compileOnly "org.projectlombok:lombok:${project.lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${project.lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${project.lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${project.lombokVersion}"
 }
 
 group 'ceg.app'
@@ -32,6 +42,7 @@ java {
 test {
     systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
 }
+
 compileJava {
     options.encoding = 'UTF-8'
     options.compilerArgs << '-parameters'
@@ -40,3 +51,4 @@ compileJava {
 compileTestJava {
     options.encoding = 'UTF-8'
 }
+

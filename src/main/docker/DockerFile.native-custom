@@ -1,0 +1,24 @@
+# Estágio de build
+FROM quay.io/quarkus/ubi-quarkus-gradle-native-image:22.3-java17 AS build
+
+# Copiar todos os arquivos necessários
+COPY gradlew /usr/src/app/
+COPY gradle /usr/src/app/gradle
+COPY build.gradle settings.gradle /usr/src/app/
+COPY src /usr/src/app/src
+
+WORKDIR /usr/src/app
+
+# Tornar o gradlew executável e rodar o build
+RUN chmod +x gradlew && \
+    ./gradlew build -Dquarkus.package.type=native
+
+# Estágio final
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.6
+
+# Copiar o executável
+COPY --from=build /usr/src/app/build/*-runner /application
+
+EXPOSE 8080
+
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
