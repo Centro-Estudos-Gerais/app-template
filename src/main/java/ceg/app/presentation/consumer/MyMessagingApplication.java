@@ -2,6 +2,7 @@ package ceg.app.presentation.consumer;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -9,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  * This class consumes messages from the test-consumer channel.
  */
 @ApplicationScoped
+@RegisterForReflection
 public class MyMessagingApplication {
 
 
