@@ -4,7 +4,29 @@ networks:
   default:
     driver: bridge
 
+
 services:
+  app:
+    image: app-template
+    depends_on:
+      - postgres
+      - b1-kafka
+      - b2-kafka
+      - b3-kafka
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_PASSWORD=postgres
+      - DB_URL=jdbc:postgresql://postgres:5432/postgres
+      - DB_USER=postgres
+      - KAFKA_SERVERS=b1-kafka:9092,b2-kafka:9093,b3-kafka:9094
+    ports:
+      - "8080:8080"
+    networks:
+      - default
+    container_name: application
+    
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -22,10 +44,18 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://b1-kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_LISTENERS: 
+        PLAINTEXT://0.0.0.0:9092,
+        EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: 
+        PLAINTEXT://b1-kafka:9092,
+        EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
-      - "9092:9092"
+      - "9092:9092"   # Porta interna para comunicação dentro do Docker
+      - "29092:29092" # Porta para comunicação externa (sua máquina local)
     networks:
       - default
 
@@ -36,10 +66,40 @@ services:
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://b2-kafka:9093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_LISTENERS: 
+        PLAINTEXT://0.0.0.0:9093,
+        EXTERNAL://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: 
+        PLAINTEXT://b2-kafka:9093,
+        EXTERNAL://localhost:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
-      - "9093:9093"
+      - "9093:9093"   # Porta interna para comunicação dentro do Docker
+      - "29093:29093" # Porta para comunicação externa (sua máquina local)
+    networks:
+      - default
+
+  b3-kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: 
+        PLAINTEXT://0.0.0.0:9094,
+        EXTERNAL://0.0.0.0:29094
+      KAFKA_ADVERTISED_LISTENERS: 
+        PLAINTEXT://b3-kafka:9094,
+        EXTERNAL://localhost:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9094:9094"   # Porta interna para comunicação dentro do Docker
+      - "29094:29094" # Porta para comunicação externa (sua máquina local)
     networks:
       - default
 
@@ -48,10 +108,16 @@ services:
     depends_on:
       - b1-kafka
       - b2-kafka
+      - b3-kafka
+      - zookeeper
     environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: b1-kafka:9092,b2-kafka:9093
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: b1-kafka:9092,b2-kafka:9093,b3-kafka:9094
       CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:2181
       CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_KAFKA_REST_PROXY_URL: "http://b1-kafka:8082"
     
     ports:
       - "9021:9021"
@@ -65,6 +131,10 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
 
 
 volumes:

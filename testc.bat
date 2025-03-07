@@ -1,1 +1,0 @@
- docker run -v test_build_native:/opt --name test_container -it eclipse-temurin:21-jdk-jammy /bin/bash

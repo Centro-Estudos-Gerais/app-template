@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
  * This class consumes messages from the test-consumer channel.
  */
 @ApplicationScoped
-@RegisterForReflection
 public class MyMessagingApplication {
 
 
@@ -18,7 +17,7 @@ public class MyMessagingApplication {
      * Consume the uppercase channel (in-memory) and print the messages.
      **/
     @Incoming("test-consumer")
-    public void sink(JsonObject word) {
+    public void sink(String word) {
         
         System.out.println(word);
     }

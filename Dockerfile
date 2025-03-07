@@ -1,42 +1,17 @@
-# Estágio de build
-FROM eclipse-temurin:21-jdk-jammy AS build
+FROM registry.access.redhat.com/ubi8/openjdk-21:1.20
 
-# Instala dependências básicas para o GraalVM
-RUN apt-get update && \
-    apt-get install -y curl gcc zlib1g-dev build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ENV LANGUAGE='en_US:en'
 
-# Baixa e instala o GraalVM
-RUN curl -L https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz -o /tmp/graalvm.tar.gz && \
-    echo "Verificando integridade do arquivo..." && \
-    tar -tf /tmp/graalvm.tar.gz > /dev/null && \
-    mkdir -p /opt/graalvm && \
-    tar -xzf /tmp/graalvm.tar.gz -C /opt/graalvm --strip-components=1 && \
-    rm /tmp/graalvm.tar.gz
 
-# Configura o GraalVM como padrão
-ENV GRAALVM_HOME=/opt/graalvm
-ENV PATH="$GRAALVM_HOME/bin:$PATH"
-
-# Copia o código fonte
-COPY gradlew /usr/src/app/
-COPY gradle /usr/src/app/gradle
-COPY build.gradle settings.gradle /usr/src/app/
-COPY src /usr/src/app/src
-
-WORKDIR /usr/src/app
-
-# Torna o gradlew executável e roda o build
-RUN chmod +x gradlew && \
-    ./gradlew build -Dquarkus.package.type=native
-
-# Estágio final
-FROM eclipse-temurin:21-jre-jammy
-
-# Copia o executável nativo
-COPY --from=build /usr/src/app/build/*-runner /application
+# We make four distinct layers so if there are application changes the library layers can be re-used
+COPY --chown=185 build/quarkus-app/lib/ /deployments/lib/
+COPY --chown=185 build/quarkus-app/*.jar /deployments/
+COPY --chown=185 build/quarkus-app/app/ /deployments/app/
+COPY --chown=185 build/quarkus-app/quarkus/ /deployments/quarkus/
 
 EXPOSE 8080
+USER 185
+ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
 
-CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
+ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
