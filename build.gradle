@@ -29,8 +29,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:${project.lombokVersion}"
 }
 
-group 'ceg.app'
-version '1.0.0-SNAPSHOT'
+
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
