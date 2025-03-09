@@ -1,86 +1,32 @@
-# app-template
+# App Template
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This repository is a sample application repository using Java Quarkus for creating new repositories that will be used to create applications.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Included Services
 
-## Running the application in dev mode
+This repository comes with a configured `docker-compose` to run the following services:
+- **3 Kafka Brokers**: Servers that form a Kafka cluster for message management and data streaming.
+- **Control Center**: Management and monitoring tool for Kafka clusters.
+- **Zookeeper**: Coordination service to manage the state of the Kafka cluster.
+- **Postgres Database**: Relational database used for persistent data storage.
 
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./gradlew quarkusDev
-```
-
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
-
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
+### How to Build the Application with Unit Tests
+To build the application with unit tests, use the command:
+```sh
 ./gradlew build
 ```
-
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./gradlew build -Dquarkus.package.jar.type=uber-jar
+### How to Run the Application Locally
+To run the application locally, use the command:
+```sh
+./gradlew quarkusDev
 ```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true
+### How to Prepare the Container to Run with Docker Compose
+To build the application and its container for use with docker compose, use the command:
+```sh
+./publish.bat
 ```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./build/app-template-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/gradle-tooling>.
-
-## Related Guides
-
-- REST Client ([guide](https://quarkus.io/guides/rest-client)): Call REST services
-- Messaging - Kafka Connector ([guide](https://quarkus.io/guides/kafka-getting-started)): Connect to Kafka with Reactive Messaging
-- OpenTelemetry ([guide](https://quarkus.io/guides/opentelemetry)): Use OpenTelemetry to trace services
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### Messaging codestart
-
-Use Quarkus Messaging
-
-[Related Apache Kafka guide section...](https://quarkus.io/guides/kafka-reactive-getting-started)
-
-
-### REST Client
-
-Invoke different services through REST with JSON
-
-[Related guide section...](https://quarkus.io/guides/rest-client)
+### How to Start the Services
+To start the services, just have Docker Compose installed on your computer and run the following command:
+```sh
+docker compose up -d
+``` 
